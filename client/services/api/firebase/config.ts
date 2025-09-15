@@ -1,6 +1,6 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 /**
  * Configuration Firebase pour le test technique
@@ -19,11 +19,18 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
-// 🔧 TOUJOURS en mode développement local (émulateurs)
-const functions = getFunctions(app, 'us-central1');
+// ✅ Configuration selon l'environnement
+const functions = getFunctions(app, "us-central1");
 
-// 🔧 TOUJOURS connecté aux émulateurs locaux
-connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+// ✅ Connexion aux émulateurs uniquement en développement
+if (process.env.NODE_ENV === "development") {
+  try {
+    connectAuthEmulator(auth, "http://127.0.0.1:9099");
+    connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  } catch (error) {
+    // Émulateurs déjà connectés
+    console.log("Émulateurs Firebase déjà connectés");
+  }
+}
 
-export { app, auth, functions }; 
+export { app, auth, functions };

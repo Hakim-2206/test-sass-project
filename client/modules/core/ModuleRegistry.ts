@@ -1,9 +1,9 @@
-import { ModuleComponent } from '../core/BaseModule';
-import { ModuleId } from '@/data/ai-employees';
-import ChatModule from '../ChatModule';
+import { ModuleComponent } from "./BaseModule";
+import { ModuleId } from "../../data/ai-employees";
+import ChatModule from "../ChatModule";
 
 const modulesComponents: Record<ModuleId, ModuleComponent> = {
-  [ModuleId.CHAT]: ChatModule
+  [ModuleId.CHAT]: ChatModule,
 };
 
 export const getModule = (moduleId: string): ModuleComponent | undefined => {
@@ -12,4 +12,4 @@ export const getModule = (moduleId: string): ModuleComponent | undefined => {
 
 export const registerModule = (moduleComponent: ModuleComponent) => {
   modulesComponents[moduleComponent.moduleId as ModuleId] = moduleComponent;
-}; 
+};

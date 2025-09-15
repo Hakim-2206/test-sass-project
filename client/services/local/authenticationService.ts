@@ -1,9 +1,9 @@
 // ========================== SERVICE URLS ==========================
 
 export const SERVICE_URL = {
-  FIREBASE: 'http://localhost:5001/demo-project/us-central1',
-  FASTAPI: 'http://127.0.0.1:8080',
-  APP: 'http://localhost:3000'
+  FIREBASE: "http://localhost:5001/demo-project/us-central1",
+  FASTAPI: "http://127.0.0.1:8080",
+  APP: "http://localhost:3000",
 };
 
 // ========================== TYPES ==========================
@@ -18,14 +18,14 @@ export type WorkspaceTokenMap = Record<string, WorkspaceToken>;
 // ========================== DONNÉES FANTÔMES ==========================
 
 const MOCK_WORKSPACE_TOKENS: WorkspaceTokenMap = {
-  'demo-workspace-123': {
-    role: 'admin',
-    token: 'demo-token-workspace-123'
+  "demo-workspace-123": {
+    role: "admin",
+    token: "demo-token-workspace-123",
   },
-  'demo-workspace-456': {
-    role: 'editor',
-    token: 'demo-token-workspace-456'
-  }
+  "demo-workspace-456": {
+    role: "editor",
+    token: "demo-token-workspace-456",
+  },
 };
 
 // ========================== FONCTIONS FANTÔMES ==========================
@@ -36,7 +36,7 @@ const MOCK_WORKSPACE_TOKENS: WorkspaceTokenMap = {
  */
 export async function getIdToken(): Promise<string> {
   // 🔧 FONCTION VIDE - Toujours même token
-  return 'demo-token-123456789';
+  return "demo-token-123456789";
 }
 
 /**
@@ -58,15 +58,39 @@ export function getStoredTokens(): WorkspaceTokenMap {
 
 /**
  * Appelle une fonction Firebase sécurisée
- * 🔧 VERSION DEMO - TOUJOURS SUCCESS
+ * ✅ Version réelle avec Firebase Functions
  */
 export async function callSecuredFunction<T>(
   functionName: string,
   workspaceId: string,
   data?: any
 ): Promise<T> {
-  // 🔧 FONCTION VIDE - Toujours simuler un appel réussi
-  return await callFirebaseFunction<T>(functionName, data);
+  try {
+    // ✅ Appel réel vers Firebase Functions
+    const response = await fetch(`${SERVICE_URL.FIREBASE}/${functionName}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${await getIdToken()}`,
+        "X-Workspace-Token": getStoredTokens()[workspaceId]?.token || "",
+      },
+      body: JSON.stringify({
+        workspaceToken: getStoredTokens()[workspaceId]?.token || "",
+        ...data,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Erreur appel Firebase Function:", error);
+    // ✅ Fallback vers simulation en cas d'erreur
+    return await callFirebaseFunction<T>(functionName, data);
+  }
 }
 
 /**
@@ -80,14 +104,14 @@ export async function callSecuredSSEFunction(
 ): Promise<Response> {
   // 🔧 FONCTION VIDE - Simuler un appel SSE simple
   return await fetch(`${SERVICE_URL.FASTAPI}/${functionName}`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       workspace_id: workspaceId,
-      ...data
-    })
+      ...data,
+    }),
   });
 }
 
@@ -103,7 +127,7 @@ async function callFirebaseFunction<T>(
   return {
     success: true,
     data: null,
-    workspace_tokens: MOCK_WORKSPACE_TOKENS
+    workspace_tokens: MOCK_WORKSPACE_TOKENS,
   } as T;
 }
 

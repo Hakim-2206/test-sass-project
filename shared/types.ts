@@ -1,16 +1,36 @@
-// ========================== CONSTANTES ET ENUMS PARTAGÉS ==============================
+// ========================== ENUMS OBLIGATOIRES ==============================
 
-export const WORKSPACE_ROLES = {
-  ADMIN: 'admin',
-  EDITOR: 'editor'
-} as const;
+// ✅ Enum obligatoire pour traçabilité (règle Agentova)
+export enum WorkspaceRoles {
+  ADMIN = "admin",
+  EDITOR = "editor",
+}
 
-export type WorkspaceRole = typeof WORKSPACE_ROLES[keyof typeof WORKSPACE_ROLES];
+export type WorkspaceRole = WorkspaceRoles;
 
 export const ROLE_PRIORITY: Record<WorkspaceRole, number> = {
-  [WORKSPACE_ROLES.ADMIN]: 0,   // le plus fort
-  [WORKSPACE_ROLES.EDITOR]: 1   // moins fort
+  [WorkspaceRoles.ADMIN]: 0, // le plus fort
+  [WorkspaceRoles.EDITOR]: 1, // moins fort
 };
+
+// ✅ Alias pour compatibilité (à supprimer progressivement)
+export const WORKSPACE_ROLES = WorkspaceRoles;
+
+// ========================== ENUMS MÉTIER ==============================
+
+// ✅ Enum pour statuts des textes
+export enum TextStatus {
+  DRAFT = "draft",
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
+}
+
+// ✅ Enum pour types de messages
+export enum MessageType {
+  TEXT = "text",
+  FILE = "file",
+  IMAGE = "image",
+}
 
 // ========================== TYPES ESSENTIELS POUR LE TEST ==============================
 
@@ -19,6 +39,7 @@ export interface TextType {
   workspace_id: string;
   title: string;
   content: string;
+  status: TextStatus; // ✅ Utilisation de l'enum
   created_by: string;
   created_at: Date;
   updated_at: Date;
@@ -27,6 +48,7 @@ export interface TextType {
 export interface CreateTextType {
   title: string;
   content: string;
+  status?: TextStatus; // ✅ Optionnel, défaut DRAFT
   created_by: string;
 }
 
@@ -66,10 +88,16 @@ export interface Session {
   updated_at: Date;
 }
 
+// ✅ Enum pour auteurs de messages
+export enum MessageAuthor {
+  USER = "user",
+  AGENT = "agent",
+}
+
 export interface Message {
   id: string;
   session_id: string;
-  author: 'user' | 'agent';
+  author: MessageAuthor; // ✅ Utilisation de l'enum
   text: string;
   timestamp: Date;
   partial?: boolean;

@@ -3,11 +3,11 @@
   "scripts": {
     "lint": "exit 0",
     "build": "tsc --noEmit --strict && echo 'Build TypeScript check'",
-    "build:watch": "echo 'Build watch simulé' && exit 0",
-    "shell": "echo 'Shell simulé' && exit 0",
-    "start": "echo 'Start simulé' && exit 0",
+    "build:watch": "tsc --watch --noEmit",
+    "shell": "firebase functions:shell",
+    "start": "firebase emulators:start --only functions",
     "deploy": "bash ../scripts/deploy.sh",
-    "dev": "bash ../scripts/deploy.sh"
+    "dev": "firebase emulators:start --only functions"
   },
   "engines": {
     "node": "22"

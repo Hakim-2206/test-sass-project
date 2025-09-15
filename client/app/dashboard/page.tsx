@@ -1,32 +1,33 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { AI_EMPLOYEES } from '@/data/ai-employees';
-import { useTexts } from '@/hooks/useTexts';
-import { RiAddLine, RiDeleteBinLine, RiEditLine } from 'react-icons/ri';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AI_EMPLOYEES } from "../../data/ai-employees";
+import { useTexts } from "../../hooks/useTexts";
+import { RiAddLine, RiDeleteBinLine, RiEditLine } from "react-icons/ri";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { texts, createText, deleteText, isLoading, isCreating, isDeleting } = useTexts();
-  
+  const { texts, createText, deleteText, isLoading, isCreating, isDeleting } =
+    useTexts();
+
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ title: '', content: '' });
+  const [formData, setFormData] = useState({ title: "", content: "" });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.content.trim()) {
       createText({
         title: formData.title.trim() || undefined,
-        content: formData.content.trim()
+        content: formData.content.trim(),
       });
-      setFormData({ title: '', content: '' });
+      setFormData({ title: "", content: "" });
       setShowForm(false);
     }
   };
 
   const handleDelete = (textId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce texte ?')) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce texte ?")) {
       deleteText(textId);
     }
   };
@@ -40,7 +41,8 @@ export default function DashboardPage() {
             Dashboard - Test Technique
           </h1>
           <p className="text-gray-600">
-            Gestion des textes avec architecture du projet (Services + Hooks + Composants)
+            Gestion des textes avec architecture du projet (Services + Hooks +
+            Composants)
           </p>
         </div>
 
@@ -52,12 +54,14 @@ export default function DashboardPage() {
             </h2>
             <div className="grid grid-cols-2 gap-4">
               {AI_EMPLOYEES.map((employee) => (
-                <div 
-                  key={employee.name} 
+                <div
+                  key={employee.name}
                   className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity p-4 rounded-lg border border-gray-200 hover:border-gray-300"
-                  onClick={() => router.push(`/dashboard/employees/${employee.id}/chat`)}
+                  onClick={() =>
+                    router.push(`/dashboard/employees/${employee.id}/chat`)
+                  }
                 >
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold mb-2"
                     style={{ backgroundColor: employee.hexColor }}
                   >
@@ -89,7 +93,10 @@ export default function DashboardPage() {
 
             {/* Formulaire de création */}
             {showForm && (
-              <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <form
+                onSubmit={handleSubmit}
+                className="mb-6 p-4 bg-gray-50 rounded-lg"
+              >
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Titre (optionnel)
@@ -97,7 +104,9 @@ export default function DashboardPage() {
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Titre du texte..."
                   />
@@ -108,7 +117,9 @@ export default function DashboardPage() {
                   </label>
                   <textarea
                     value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, content: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows={4}
                     placeholder="Contenu du texte..."
@@ -121,7 +132,7 @@ export default function DashboardPage() {
                     disabled={!formData.content.trim() || isCreating}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isCreating ? 'Création...' : 'Créer'}
+                    {isCreating ? "Création..." : "Créer"}
                   </button>
                   <button
                     type="button"
@@ -144,13 +155,20 @@ export default function DashboardPage() {
               ) : texts.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <p>Aucun texte enregistré.</p>
-                  <p className="text-sm">Créez votre premier texte pour commencer !</p>
+                  <p className="text-sm">
+                    Créez votre premier texte pour commencer !
+                  </p>
                 </div>
               ) : (
                 texts.map((text) => (
-                  <div key={text.id} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                  <div
+                    key={text.id}
+                    className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
+                  >
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium text-gray-900">{text.title}</h3>
+                      <h3 className="font-medium text-gray-900">
+                        {text.title}
+                      </h3>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDelete(text.id)}
@@ -164,7 +182,9 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-gray-600 text-sm mb-2">{text.content}</p>
                     <p className="text-xs text-gray-400">
-                      Créé le {new Date(text.created_at).toLocaleDateString('fr-FR')} à {new Date(text.created_at).toLocaleTimeString('fr-FR')}
+                      Créé le{" "}
+                      {new Date(text.created_at).toLocaleDateString("fr-FR")} à{" "}
+                      {new Date(text.created_at).toLocaleTimeString("fr-FR")}
                     </p>
                   </div>
                 ))
@@ -175,4 +195,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-} 
+}

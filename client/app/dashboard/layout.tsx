@@ -1,10 +1,9 @@
-'use client';
+"use client";
 
-import React from 'react';
-import ProtectedLayout from './protected-layout';
-import { WorkspaceProvider } from '@/contexts/WorkspaceContext';
-import { ChatParamsProvider } from '@/contexts/ChatParamsContext';
-
+import React from "react";
+import ProtectedLayout from "./protected-layout";
+import { WorkspaceProvider } from "../../contexts/WorkspaceContext";
+import { ChatParamsProvider } from "../../contexts/ChatParamsContext";
 
 export default function DashboardLayout({
   children,
@@ -15,9 +14,7 @@ export default function DashboardLayout({
     <ProtectedLayout>
       <WorkspaceProvider>
         <ChatParamsProvider>
-          <div className="min-h-screen bg-white">
-            {children}
-          </div>
+          <div className="min-h-screen bg-white">{children}</div>
         </ChatParamsProvider>
       </WorkspaceProvider>
     </ProtectedLayout>
