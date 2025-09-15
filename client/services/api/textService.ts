@@ -1,27 +1,27 @@
 import { callSecuredFunction } from "../index";
-import { TextType, CreateTextType, TextStatus } from "../../../shared/types";
+import {
+  TextType,
+  CreateTextType,
+  TextStatus,
+  CreateTextRequest,
+  TextsResponse,
+  TextResponse,
+} from "../../../shared/types";
 
 // ✅ Ré-export des types pour compatibilité
-export type { TextType, CreateTextType, TextStatus };
+export type {
+  TextType,
+  CreateTextType,
+  TextStatus,
+  CreateTextRequest,
+  TextsResponse,
+  TextResponse,
+};
 
 /**
  * Service de gestion des textes côté client
  * ✅ Conforme aux règles Agentova - Méthodes statiques uniquement
  */
-
-export interface CreateTextRequest {
-  title?: string;
-  content: string;
-  status?: TextStatus;
-}
-
-export interface TextsResponse {
-  texts: TextType[];
-}
-
-export interface TextResponse {
-  text: TextType;
-}
 
 export class TextService {
   /**

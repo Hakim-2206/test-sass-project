@@ -52,6 +52,22 @@ export interface CreateTextType {
   created_by: string;
 }
 
+// ✅ Types pour les requêtes client
+export interface CreateTextRequest {
+  title?: string;
+  content: string;
+  status?: TextStatus;
+}
+
+// ✅ Types pour les réponses API
+export interface TextsResponse {
+  texts: TextType[];
+}
+
+export interface TextResponse {
+  text: TextType;
+}
+
 // ========================== TYPES MESSAGES (pour le chat) ==============================
 
 export interface MessageFileInline {

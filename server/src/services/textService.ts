@@ -32,12 +32,12 @@ export const createText = onCall(
   },
   async (request) => {
     try {
-      // ✅ 1. Validation auth OBLIGATOIRE
+      // 1️⃣ Validation auth OBLIGATOIRE
       const authResponse = validateAuth(request.auth);
       if (!isSuccess(authResponse)) return authResponse;
       const uid = authResponse.user;
 
-      // ✅ 2. Extraction et validation params
+      // 2️⃣ Extraction et validation params
       const { workspaceToken, content, title } = request.data;
       const validationResponse = validateRequiredFields(request.data, [
         "workspaceToken",
@@ -45,7 +45,7 @@ export const createText = onCall(
       ]);
       if (!isSuccess(validationResponse)) return validationResponse;
 
-      // ✅ 3. Validation workspace + rôles
+      // 3️⃣ Validation workspace + rôles
       const tokenValidation = await verifyWorkspaceToken(
         workspaceToken,
         uid,
@@ -56,7 +56,7 @@ export const createText = onCall(
       const { workspace_id, workspace_tokens } = validationResult;
       const response = createResponseWithTokens(workspace_tokens);
 
-      // ✅ 4. Validation métier séparée
+      // 4️⃣ Validation métier séparée
       const textValidation = validateTextData({
         title: title?.trim(),
         content: content.trim(),
@@ -73,7 +73,7 @@ export const createText = onCall(
         });
       }
 
-      // ✅ 5. Logique métier via repository
+      // 5️⃣ Logique métier via repository
       const textData = {
         content: content.trim(),
         title: title?.trim() || "Sans titre",
@@ -82,15 +82,22 @@ export const createText = onCall(
 
       const newText = await getTextRepository().create(workspace_id, textData);
 
-      // ✅ 6. Logging succès
-      logger.info(
-        `Texte créé avec succès pour workspace ${workspace_id} par ${uid}`
-      );
+      // 6️⃣ Logging succès
+      logger.info("Texte créé avec succès", {
+        workspace_id,
+        user_id: uid,
+        action: "create_text",
+        text_id: newText.id,
+      });
 
-      // ✅ 7. Réponse standardisée
+      // 7️⃣ Réponse standardisée
       return response.success({ text: newText });
     } catch (error) {
-      logger.error(`Erreur dans createText:`, error);
+      logger.error("Erreur dans createText", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        context: { user_id: request.auth?.uid },
+      });
       return handleError(error);
     }
   }
@@ -101,24 +108,25 @@ export const createText = onCall(
  */
 export const getTexts = onCall(
   {
+    secrets: [databaseUrlProd, jwtWorkspaceSecret], // ✅ Secrets obligatoires
     memory: "512MiB",
     timeoutSeconds: 60,
   },
   async (request) => {
     try {
-      // ✅ 1. Validation auth OBLIGATOIRE
+      // 1️⃣ Validation auth OBLIGATOIRE
       const authResponse = validateAuth(request.auth);
       if (!isSuccess(authResponse)) return authResponse;
       const uid = authResponse.user;
 
-      // ✅ 2. Extraction et validation params
+      // 2️⃣ Extraction et validation params
       const { workspaceToken } = request.data;
       const validationResponse = validateRequiredFields(request.data, [
         "workspaceToken",
       ]);
       if (!isSuccess(validationResponse)) return validationResponse;
 
-      // ✅ 3. Validation workspace + rôles
+      // 3️⃣ Validation workspace + rôles
       const tokenValidation = await verifyWorkspaceToken(
         workspaceToken,
         uid,
@@ -129,16 +137,25 @@ export const getTexts = onCall(
       const { workspace_id, workspace_tokens } = validationResult;
       const response = createResponseWithTokens(workspace_tokens);
 
-      // ✅ 5. Logique métier via repository
+      // 4️⃣ Logique métier via repository
       const texts = await getTextRepository().getByWorkspace(workspace_id);
 
-      // ✅ 6. Logging succès
-      logger.info(`Textes récupérés pour workspace ${workspace_id} par ${uid}`);
+      // 5️⃣ Logging succès
+      logger.info("Textes récupérés avec succès", {
+        workspace_id,
+        user_id: uid,
+        action: "get_texts",
+        count: texts.length,
+      });
 
-      // ✅ 7. Réponse standardisée
+      // 6️⃣ Réponse standardisée
       return response.success({ texts });
     } catch (error) {
-      logger.error(`Erreur dans getTexts:`, error);
+      logger.error("Erreur dans getTexts", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        context: { user_id: request.auth?.uid },
+      });
       return handleError(error);
     }
   }
@@ -149,17 +166,18 @@ export const getTexts = onCall(
  */
 export const deleteText = onCall(
   {
+    secrets: [databaseUrlProd, jwtWorkspaceSecret], // ✅ Secrets obligatoires
     memory: "512MiB",
     timeoutSeconds: 60,
   },
   async (request) => {
     try {
-      // ✅ 1. Validation auth OBLIGATOIRE
+      // 1️⃣ Validation auth OBLIGATOIRE
       const authResponse = validateAuth(request.auth);
       if (!isSuccess(authResponse)) return authResponse;
       const uid = authResponse.user;
 
-      // ✅ 2. Extraction et validation params
+      // 2️⃣ Extraction et validation params
       const { workspaceToken, textId } = request.data;
       const validationResponse = validateRequiredFields(request.data, [
         "workspaceToken",
@@ -167,7 +185,7 @@ export const deleteText = onCall(
       ]);
       if (!isSuccess(validationResponse)) return validationResponse;
 
-      // ✅ 3. Validation workspace + rôles
+      // 3️⃣ Validation workspace + rôles
       const tokenValidation = await verifyWorkspaceToken(
         workspaceToken,
         uid,
@@ -178,7 +196,7 @@ export const deleteText = onCall(
       const { workspace_id, workspace_tokens } = validationResult;
       const response = createResponseWithTokens(workspace_tokens);
 
-      // ✅ 5. Logique métier via repository
+      // 4️⃣ Logique métier via repository
       const deleted = await getTextRepository().delete(textId, workspace_id);
 
       if (!deleted) {
@@ -188,15 +206,22 @@ export const deleteText = onCall(
         });
       }
 
-      // ✅ 6. Logging succès
-      logger.info(
-        `Texte ${textId} supprimé pour workspace ${workspace_id} par ${uid}`
-      );
+      // 5️⃣ Logging succès
+      logger.info("Texte supprimé avec succès", {
+        workspace_id,
+        user_id: uid,
+        action: "delete_text",
+        text_id: textId,
+      });
 
-      // ✅ 7. Réponse standardisée
+      // 6️⃣ Réponse standardisée
       return response.success({ deleted: true });
     } catch (error) {
-      logger.error(`Erreur dans deleteText:`, error);
+      logger.error("Erreur dans deleteText", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        context: { user_id: request.auth?.uid },
+      });
       return handleError(error);
     }
   }

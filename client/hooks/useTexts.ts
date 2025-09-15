@@ -105,7 +105,7 @@ export function useTexts() {
     });
   }, [currentWorkspaceId, queryClient]);
 
-  // ✅ Return organisé par catégorie
+  // ✅ Return organisé par catégorie selon pattern Agentova
   return {
     // Data
     texts: textsQuery.data || [],
