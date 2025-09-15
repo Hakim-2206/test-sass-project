@@ -27,8 +27,8 @@ export function useComments(textId?: string) {
       textId
         ? CommentService.getComments(currentWorkspaceId, textId)
         : CommentService.getComments(currentWorkspaceId, ""), // TODO: Implémenter getAllComments
-    staleTime: 0,
-    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes - évite les rechargements inutiles
+    refetchOnMount: false, // Pas de rechargement automatique
     placeholderData: (previousData) => previousData,
     enabled: !!currentWorkspaceId && !!textId, // ✅ Seulement si on a les IDs requis
   });
@@ -37,17 +37,70 @@ export function useComments(textId?: string) {
   const createMutation = useMutation({
     mutationFn: (data: CreateCommentRequest) =>
       CommentService.createComment(currentWorkspaceId, data),
-    onSuccess: (newData) => {
-      // ✅ Invalidation forcée pour recharger les données depuis le serveur
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.byText(
+    onMutate: async (newComment) => {
+      // ✅ Mise à jour optimiste immédiate (avant l'appel API)
+      const queryKey = queryKeys.comments.byText(
+        currentWorkspaceId,
+        newComment.text_id
+      );
+
+      // Annuler les requêtes en cours pour éviter les conflits
+      await queryClient.cancelQueries({ queryKey });
+
+      // Sauvegarder l'état précédent pour rollback
+      const previousComments = queryClient.getQueryData(queryKey);
+
+      // Créer un commentaire temporaire avec ID unique
+      const tempComment = {
+        id: `temp-${Date.now()}`,
+        workspace_id: currentWorkspaceId,
+        text_id: newComment.text_id,
+        content: newComment.content,
+        status: newComment.status || "published",
+        author_id: "demo-user-123",
+        author_name: "Utilisateur Demo",
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      // Mise à jour optimiste immédiate
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) {
+          return { comments: [tempComment] };
+        }
+        return {
+          ...old,
+          comments: [tempComment, ...old.comments],
+        };
+      });
+
+      return { previousComments, tempComment };
+    },
+    onSuccess: (newData, variables, context) => {
+      // ✅ Remplacer le commentaire temporaire par le vrai
+      const queryKey = queryKeys.comments.byText(
+        currentWorkspaceId,
+        newData.comment.text_id
+      );
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          comments: old.comments.map((comment: any) =>
+            comment.id === context?.tempComment.id ? newData.comment : comment
+          ),
+        };
+      });
+    },
+    onError: (err, variables, context) => {
+      // ✅ Rollback en cas d'erreur
+      if (context?.previousComments) {
+        const queryKey = queryKeys.comments.byText(
           currentWorkspaceId,
-          newData.comment.text_id
-        ),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.all(currentWorkspaceId),
-      });
+          variables.text_id
+        );
+        queryClient.setQueryData(queryKey, context.previousComments);
+      }
     },
   });
 
@@ -61,12 +114,21 @@ export function useComments(textId?: string) {
       data: UpdateCommentRequest;
     }) => CommentService.updateComment(currentWorkspaceId, commentId, data),
     onSuccess: (updatedData) => {
-      // ✅ Invalidation forcée pour recharger les données depuis le serveur
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.byText(
-          currentWorkspaceId,
-          updatedData.comment.text_id
-        ),
+      // ✅ Mise à jour optimiste du cache (plus rapide)
+      const queryKey = queryKeys.comments.byText(
+        currentWorkspaceId,
+        updatedData.comment.text_id
+      );
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          comments: old.comments.map((comment: CommentType) =>
+            comment.id === updatedData.comment.id
+              ? updatedData.comment
+              : comment
+          ),
+        };
       });
     },
   });
@@ -76,12 +138,19 @@ export function useComments(textId?: string) {
     mutationFn: (commentId: string) =>
       CommentService.deleteComment(currentWorkspaceId, commentId),
     onSuccess: (_, commentId) => {
-      // ✅ Invalidation forcée pour recharger les données depuis le serveur
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.byText(currentWorkspaceId, textId || ""),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.comments.all(currentWorkspaceId),
+      // ✅ Mise à jour optimiste du cache (plus rapide)
+      const queryKey = queryKeys.comments.byText(
+        currentWorkspaceId,
+        textId || ""
+      );
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          comments: old.comments.filter(
+            (comment: CommentType) => comment.id !== commentId
+          ),
+        };
       });
     },
   });

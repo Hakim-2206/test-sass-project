@@ -128,6 +128,9 @@ async function callFirebaseFunction<T>(
 ): Promise<T> {
   console.log(`🔧 [DEMO] Simulation: ${functionName}`, data);
 
+  // ✅ Délai artificiel réduit pour une meilleure UX
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
   // ✅ Simulation des appels Firebase Functions
   if (functionName === "getTexts") {
     // Simuler la récupération des textes
@@ -214,9 +217,12 @@ async function callFirebaseFunction<T>(
   }
 
   if (functionName === "getComments") {
-    // ✅ Récupérer les commentaires du stockage persistant
+    // ✅ Récupérer les commentaires du stockage persistant, triés par date décroissante
     const textComments = MOCK_COMMENTS.filter(
       (comment) => comment.text_id === data.text_id
+    ).sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
     return { comments: textComments } as T;
   }
