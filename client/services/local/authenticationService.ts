@@ -28,6 +28,9 @@ const MOCK_WORKSPACE_TOKENS: WorkspaceTokenMap = {
   },
 };
 
+// ✅ Stockage persistant des commentaires en mode démo
+const MOCK_COMMENTS: any[] = [];
+
 // ========================== FONCTIONS FANTÔMES ==========================
 
 /**
@@ -187,6 +190,67 @@ async function callFirebaseFunction<T>(
       updated_at: new Date(),
     };
     return { text: updatedText } as T;
+  }
+
+  // ✅ Simulation des fonctions de commentaires
+  if (functionName === "createComment") {
+    // Simuler la création d'un commentaire
+    const newComment = {
+      id: `demo-comment-${Date.now()}`,
+      workspace_id: "demo-workspace-123",
+      text_id: data.text_id,
+      content: data.content,
+      status: data.status || "published",
+      author_id: "demo-user-123",
+      author_name: "Utilisateur Demo",
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    // ✅ Ajouter au stockage persistant
+    MOCK_COMMENTS.push(newComment);
+
+    return { comment: newComment } as T;
+  }
+
+  if (functionName === "getComments") {
+    // ✅ Récupérer les commentaires du stockage persistant
+    const textComments = MOCK_COMMENTS.filter(
+      (comment) => comment.text_id === data.text_id
+    );
+    return { comments: textComments } as T;
+  }
+
+  if (functionName === "updateComment") {
+    // ✅ Mettre à jour le commentaire dans le stockage persistant
+    const commentIndex = MOCK_COMMENTS.findIndex(
+      (comment) => comment.id === data.comment_id
+    );
+    if (commentIndex !== -1) {
+      MOCK_COMMENTS[commentIndex] = {
+        ...MOCK_COMMENTS[commentIndex],
+        content: data.content || MOCK_COMMENTS[commentIndex].content,
+        status: data.status || MOCK_COMMENTS[commentIndex].status,
+        updated_at: new Date(),
+      };
+      return { comment: MOCK_COMMENTS[commentIndex] } as T;
+    }
+
+    // Fallback si commentaire non trouvé
+    return { comment: null } as T;
+  }
+
+  if (functionName === "deleteComment") {
+    // ✅ Supprimer le commentaire du stockage persistant
+    const commentIndex = MOCK_COMMENTS.findIndex(
+      (comment) => comment.id === data.comment_id
+    );
+    if (commentIndex !== -1) {
+      MOCK_COMMENTS.splice(commentIndex, 1);
+      return { deleted: true } as T;
+    }
+
+    return { deleted: false } as T;
   }
 
   // Fallback pour les autres fonctions

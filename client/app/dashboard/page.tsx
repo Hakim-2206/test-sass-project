@@ -2,9 +2,19 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AI_EMPLOYEES } from "../../data/ai-employees";
+import {
+  AI_EMPLOYEES,
+  getAppsByEmployee,
+  EmployeeName,
+} from "../../data/ai-employees";
 import { useTexts } from "../../hooks/useTexts";
-import { RiAddLine, RiDeleteBinLine, RiEditLine } from "react-icons/ri";
+import { TextWithComments } from "../../components/text/TextWithComments";
+import {
+  RiAddLine,
+  RiChat3Line,
+  RiFileTextLine,
+  RiChat1Line,
+} from "react-icons/ri";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -52,26 +62,68 @@ export default function DashboardPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Agents IA Disponibles
             </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {AI_EMPLOYEES.map((employee) => (
-                <div
-                  key={employee.name}
-                  className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity p-4 rounded-lg border border-gray-200 hover:border-gray-300"
-                  onClick={() =>
-                    router.push(`/dashboard/employees/${employee.id}/chat`)
-                  }
-                >
+            <div className="space-y-6">
+              {AI_EMPLOYEES.map((employee) => {
+                const apps = getAppsByEmployee(employee.id as EmployeeName);
+                return (
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold mb-2"
-                    style={{ backgroundColor: employee.hexColor }}
+                    key={employee.name}
+                    className="border border-gray-200 rounded-lg p-4"
                   >
-                    {employee.name.charAt(0).toUpperCase()}
+                    {/* Header de l'employé */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold"
+                        style={{ backgroundColor: employee.hexColor }}
+                      >
+                        {employee.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {employee.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">{employee.role}</p>
+                      </div>
+                    </div>
+
+                    {/* Applications disponibles */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {apps.map((app) => {
+                        const IconComponent =
+                          app.icons[0] === "RiChat3Line"
+                            ? RiChat3Line
+                            : app.icons[0] === "RiFileTextLine"
+                            ? RiFileTextLine
+                            : app.icons[0] === "RiChat1Line"
+                            ? RiChat1Line
+                            : RiChat3Line;
+
+                        return (
+                          <div
+                            key={app.moduleId}
+                            className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer transition-colors bg-gray-50 hover:bg-gray-100"
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/employees/${employee.id}/${app.moduleId}`
+                              )
+                            }
+                          >
+                            <IconComponent className="w-5 h-5 text-gray-600" />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium text-gray-900 truncate">
+                                {app.title}
+                              </h4>
+                              <p className="text-xs text-gray-500 truncate">
+                                {app.subtitle}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <span className="text-sm font-medium text-gray-700 text-center">
-                    {employee.name}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -161,32 +213,12 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 texts.map((text) => (
-                  <div
+                  <TextWithComments
                     key={text.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium text-gray-900">
-                        {text.title}
-                      </h3>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleDelete(text.id)}
-                          disabled={isDeleting}
-                          className="text-red-600 hover:text-red-800 p-1"
-                          title="Supprimer"
-                        >
-                          <RiDeleteBinLine className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2">{text.content}</p>
-                    <p className="text-xs text-gray-400">
-                      Créé le{" "}
-                      {new Date(text.created_at).toLocaleDateString("fr-FR")} à{" "}
-                      {new Date(text.created_at).toLocaleTimeString("fr-FR")}
-                    </p>
-                  </div>
+                    text={text}
+                    onDelete={handleDelete}
+                    isDeleting={isDeleting}
+                  />
                 ))
               )}
             </div>

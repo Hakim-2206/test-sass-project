@@ -32,6 +32,13 @@ export enum MessageType {
   IMAGE = "image",
 }
 
+// ✅ Enum pour statuts des commentaires
+export enum CommentStatus {
+  DRAFT = "draft",
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
+}
+
 // ========================== TYPES ESSENTIELS POUR LE TEST ==============================
 
 export interface TextType {
@@ -66,6 +73,52 @@ export interface TextsResponse {
 
 export interface TextResponse {
   text: TextType;
+}
+
+// ========================== TYPES COMMENTAIRES ==============================
+
+export interface CommentType {
+  id: string;
+  workspace_id: string;
+  text_id: string; // Relation avec le texte
+  content: string;
+  status: CommentStatus; // ✅ Utilisation de l'enum
+  author_id: string;
+  author_name: string; // Pour affichage
+  created_at: Date;
+  updated_at: Date;
+  parent_id?: string; // Pour les réponses (futur)
+}
+
+export interface CreateCommentType {
+  text_id: string;
+  content: string;
+  status?: CommentStatus; // Optionnel, défaut DRAFT
+  author_id: string;
+  author_name: string;
+  parent_id?: string; // Pour les réponses
+}
+
+// ✅ Types pour les requêtes client
+export interface CreateCommentRequest {
+  text_id: string;
+  content: string;
+  status?: CommentStatus;
+  parent_id?: string;
+}
+
+export interface UpdateCommentRequest {
+  content: string;
+  status?: CommentStatus;
+}
+
+// ✅ Types pour les réponses API commentaires
+export interface CommentsResponse {
+  comments: CommentType[];
+}
+
+export interface CommentResponse {
+  comment: CommentType;
 }
 
 // ========================== TYPES MESSAGES (pour le chat) ==============================

@@ -12,6 +12,7 @@ export enum EmployeeName {
 export enum ModuleId {
   CHAT = "chat",
   TEXTS = "texts",
+  COMMENTS = "comments",
 }
 
 export interface App {
@@ -69,6 +70,14 @@ export const employeeApps: Partial<Record<EmployeeName, App[]>> = {
       subtitle: "Créer et gérer des textes",
       description: "Créez, modifiez et organisez vos textes",
       icons: ["RiFileTextLine"],
+    },
+    {
+      moduleId: ModuleId.COMMENTS,
+      title: "Gestion des Commentaires",
+      subtitle: "Commenter et discuter",
+      description:
+        "Ajoutez des commentaires et gérez les discussions sur vos textes",
+      icons: ["RiChat1Line"],
     },
   ],
 };
