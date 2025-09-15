@@ -117,13 +117,79 @@ export async function callSecuredSSEFunction(
 
 /**
  * Fonction Firebase fantôme
- * 🔧 VERSION DEMO - TOUJOURS SUCCESS
+ * 🔧 VERSION DEMO - Simulation complète des fonctions
  */
 async function callFirebaseFunction<T>(
   functionName: string,
   data: any
 ): Promise<T> {
-  // 🔧 FONCTION VIDE - Toujours retourner success
+  console.log(`🔧 [DEMO] Simulation: ${functionName}`, data);
+
+  // ✅ Simulation des appels Firebase Functions
+  if (functionName === "getTexts") {
+    // Simuler la récupération des textes
+    const mockTexts = [
+      {
+        id: "demo-text-1",
+        workspace_id: "demo-workspace-123",
+        title: "Texte de démonstration",
+        content:
+          "Ceci est un texte de démonstration pour tester l'application.",
+        status: "draft",
+        created_by: "demo-user-123",
+        created_at: new Date("2024-01-01T10:00:00Z"),
+        updated_at: new Date("2024-01-01T10:00:00Z"),
+      },
+      {
+        id: "demo-text-2",
+        workspace_id: "demo-workspace-123",
+        title: "Autre texte",
+        content: "Un autre texte pour tester la liste des textes.",
+        status: "published",
+        created_by: "demo-user-123",
+        created_at: new Date("2024-01-02T14:30:00Z"),
+        updated_at: new Date("2024-01-02T14:30:00Z"),
+      },
+    ];
+    return { texts: mockTexts } as T;
+  }
+
+  if (functionName === "createText") {
+    // Simuler la création d'un texte
+    const newText = {
+      id: `demo-text-${Date.now()}`,
+      workspace_id: "demo-workspace-123",
+      title: data.title || "Sans titre",
+      content: data.content,
+      status: data.status || "draft",
+      created_by: "demo-user-123",
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    return { text: newText } as T;
+  }
+
+  if (functionName === "deleteText") {
+    // Simuler la suppression d'un texte
+    return { deleted: true } as T;
+  }
+
+  if (functionName === "updateText") {
+    // Simuler la mise à jour d'un texte
+    const updatedText = {
+      id: data.textId,
+      workspace_id: "demo-workspace-123",
+      title: data.title || "Sans titre",
+      content: data.content || "Contenu mis à jour",
+      status: data.status || "draft",
+      created_by: "demo-user-123",
+      created_at: new Date("2024-01-01T10:00:00Z"),
+      updated_at: new Date(),
+    };
+    return { text: updatedText } as T;
+  }
+
+  // Fallback pour les autres fonctions
   return {
     success: true,
     data: null,

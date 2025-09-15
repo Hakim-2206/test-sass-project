@@ -1,8 +1,19 @@
-import dotenv from "dotenv";
-
-// Charger .env.local uniquement en développement
+// ✅ Configuration des variables d'environnement pour le mode démo
 if (process.env.NODE_ENV === "development") {
-  dotenv.config({ path: ".env.local" });
+  // Définir les variables d'environnement pour le mode démo
+  process.env.DATABASE_URL =
+    process.env.DATABASE_URL || "postgresql://demo:demo@localhost:5432/demo_db";
+  process.env.SERVER_API_AGENT_TOKEN =
+    process.env.SERVER_API_AGENT_TOKEN || "demo-server-token-123";
+  process.env.JWT_WORKSPACE_SECRET =
+    process.env.JWT_WORKSPACE_SECRET || "demo-jwt-secret-456";
+  process.env.DATABASE_URL_PROD =
+    process.env.DATABASE_URL_PROD ||
+    "postgresql://demo:demo@localhost:5432/demo_db";
+
+  console.log(
+    "🔧 [DEMO] Variables d'environnement configurées pour le mode démo"
+  );
 }
 
 import { initializeApp } from "firebase-admin/app";

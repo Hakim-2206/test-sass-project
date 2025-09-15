@@ -1,4 +1,3 @@
-// ✅ Export uniquement des services nécessaires pour le test
-export * from './utils/authWorkspace';
-export * from './services/textService';
-
+// ✅ Export des fonctions Firebase pour le test
+export { createText, getTexts, deleteText } from "./services/textService";
+export * from "./utils/authWorkspace";
